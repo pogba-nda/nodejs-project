@@ -1,1 +1,305 @@
 
+import React, { useState } from "react";
+import axios from 'axios';
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "./AuthContext";
+import { FcGoogle } from "react-icons/fc";
+import { FaBook, FaUtensils } from "react-icons/fa";
+
+function AuthPage() {
+    const { login } = useAuth();
+    const [loginValues, setLoginValues] = useState({
+        UserName: '',
+        Password: ''
+    });
+    
+    const [signupValues, setSignupValues] = useState({
+        UserName: '',
+        Email: '',
+        Password: ''
+    });
+
+    const [activeTab, setActiveTab] = useState('login');
+    const navigate = useNavigate();
+
+    const handleLoginInput = (event) => {
+        setLoginValues(prev => ({ ...prev, [event.target.name]: event.target.value }));
+    };
+
+    const handleSignupInput = (event) => {
+        setSignupValues(prev => ({ ...prev, [event.target.name]: event.target.value }));
+    };
+
+    const handleLoginSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const res = await axios.post('http://localhost:7081/login', loginValues);
+            if (res.data.Login) {
+                login();
+                navigate('/Home');
+            } else {
+                alert("Username or password is incorrect");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Login failed. Please try again.");
+        }
+    };
+
+    const handleSignupSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            await axios.post('http://localhost:7081/signup', signupValues);
+            alert("Registration successful! You can now login.");
+            setSignupValues({
+                UserName: '',
+                Email: '',
+                Password: ''
+            });
+            setActiveTab('login');
+        } catch (error) {
+            console.error(error);
+            alert("Registration failed. Please try again.");
+        }
+    };
+
+    const handleGoogleLogin = () => {
+        // Implement Google OAuth logic here
+        alert("Google login would be implemented here");
+    };
+
+    return (
+        <div className="auth-container" style={{
+            backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed',
+            minHeight: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px'
+        }}>
+            <div className="container" style={{ maxWidth: '500px' }}>
+                <div className="card shadow-lg" style={{ 
+                    borderRadius: '15px', 
+                    overflow: 'hidden',
+                    border: 'none',
+                    backdropFilter: 'blur(5px)',
+                    backgroundColor: 'rgba(220, 223, 227, 0.9)'
+                }}>
+                    <div className="card-header p-3" style={{ 
+                        backgroundColor: 'rgba(22, 11, 240, 0.9)',
+                        color: 'white'
+                    }}>
+                        <div className="d-flex align-items-center justify-content-center mb-2">
+                            <FaUtensils className="me-2" size={24} />
+                            <h4 className="mb-0">FOODIE DELIGHTS</h4>
+                        </div>
+                        <ul className="nav nav-tabs card-header-tabs border-0 justify-content-center">
+                            <li className="nav-item">
+                                <button 
+                                    className={`nav-link ${activeTab === 'login' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('login')}
+                                    style={{ 
+                                        padding: '8px 20px',
+                                        fontSize: '0.95rem',
+                                        fontWeight: '500',
+                                        color: activeTab === 'login' ? 'tomato' : 'white',
+                                        backgroundColor: activeTab === 'login' ? 'white' : 'transparent',
+                                        border: 'none',
+                                        borderRadius: '20px',
+                                        margin: '0 5px'
+                                    }}
+                                >
+                                    Login
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button 
+                                    className={`nav-link ${activeTab === 'signup' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('signup')}
+                                    style={{ 
+                                        padding: '8px 20px',
+                                        fontSize: '0.95rem',
+                                        fontWeight: '500',
+                                        color: activeTab === 'signup' ? 'tomato' : 'white',
+                                        backgroundColor: activeTab === 'signup' ? 'white' : 'transparent',
+                                        border: 'none',
+                                        borderRadius: '20px',
+                                        margin: '0 5px'
+                                    }}
+                                >
+                                    Sign Up
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="card-body p-4">
+                        {activeTab === 'login' ? (
+                            <form onSubmit={handleLoginSubmit}>
+                                <h3 className="text-center mb-4" style={{ color: 'tomato' }}>Welcome Back Foodie!</h3>
+                                
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-danger w-100 mb-3 d-flex align-items-center justify-content-center"
+                                    onClick={handleGoogleLogin}
+                                    style={{ borderRadius: '20px' }}
+                                >
+                                    <FcGoogle className="me-2" size={20} />
+                                    Continue with Google
+                                </button>
+                                
+                                <div className="divider d-flex align-items-center my-4">
+                                    <p className="text-center mx-3 mb-0" style={{ color: '#666' }}>OR</p>
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <input
+                                        type="text"
+                                        placeholder="Username"
+                                        name="UserName"
+                                        value={loginValues.UserName}
+                                        onChange={handleLoginInput}
+                                        className="form-control"
+                                        style={{ borderRadius: '20px', padding: '10px 15px' }}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        name="Password"
+                                        value={loginValues.Password}
+                                        onChange={handleLoginInput}
+                                        className="form-control"
+                                        style={{ borderRadius: '20px', padding: '10px 15px' }}
+                                        required
+                                    />
+                                </div>
+                                <div className="d-flex justify-content-between mb-3">
+                                    <div className="form-check">
+                                        <input type="checkbox" className="form-check-input" id="rememberMe" />
+                                        <label className="form-check-label" htmlFor="rememberMe">Remember me</label>
+                                    </div>
+                                    <Link to="/forgot-password" className="text-decoration-none" style={{ color: 'tomato' }}>Forgot password?</Link>
+                                </div>
+                                <button type="submit" className="btn w-100 py-2" style={{ 
+                                    backgroundColor: 'tomato', 
+                                    color: 'white',
+                                    borderRadius: '20px',
+                                    border: 'none'
+                                }}>
+                                    Log In
+                                </button>
+                                <p className="text-center mt-3 mb-0">
+                                    Don't have an account?{' '}
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-link p-0 text-decoration-none" 
+                                        onClick={() => setActiveTab('signup')}
+                                        style={{ color: 'tomato' }}
+                                    >
+                                        Sign up
+                                    </button>
+                                </p>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleSignupSubmit}>
+                                <h3 className="text-center mb-4" style={{ color: 'tomato' }}>Join Our Food Community</h3>
+                                
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-danger w-100 mb-3 d-flex align-items-center justify-content-center"
+                                    onClick={handleGoogleLogin}
+                                    style={{ borderRadius: '20px' }}
+                                >
+                                    <FcGoogle className="me-2" size={20} />
+                                    Continue with Google
+                                </button>
+                                
+                                <div className="divider d-flex align-items-center my-4">
+                                    <p className="text-center mx-3 mb-0" style={{ color: '#666' }}>OR</p>
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <input
+                                        type="text"
+                                        placeholder="Username"
+                                        name="UserName"
+                                        value={signupValues.UserName}
+                                        onChange={handleSignupInput}
+                                        className="form-control"
+                                        style={{ borderRadius: '20px', padding: '10px 15px' }}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <input
+                                        type="email"
+                                        placeholder="Email"
+                                        name="Email"
+                                        value={signupValues.Email}
+                                        onChange={handleSignupInput}
+                                        className="form-control"
+                                        style={{ borderRadius: '20px', padding: '10px 15px' }}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        name="Password"
+                                        value={signupValues.Password}
+                                        onChange={handleSignupInput}
+                                        className="form-control"
+                                        style={{ borderRadius: '20px', padding: '10px 15px' }}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-check mb-3">
+                                    <input type="checkbox" className="form-check-input" id="termsCheck" required />
+                                    <label className="form-check-label" htmlFor="termsCheck">
+                                        I agree to the <Link to="/terms" className="text-decoration-none" style={{ color: 'tomato' }}>Terms</Link>
+                                    </label>
+                                </div>
+                                <button type="submit" className="btn w-100 py-2" style={{ 
+                                    backgroundColor: 'tomato', 
+                                    color: 'white',
+                                    borderRadius: '20px',
+                                    border: 'none'
+                                }}>
+                                    Sign Up
+                                </button>
+                                <p className="text-center mt-3 mb-0">
+                                    Already have an account?{' '}
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-link p-0 text-decoration-none" 
+                                        onClick={() => setActiveTab('login')}
+                                        style={{ color: 'tomato' }}
+                                    >
+                                        Login
+                                    </button>
+                                </p>
+                            </form>
+                        )}
+                    </div>
+                    <div className="card-footer text-center p-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}>
+                        <div className="d-flex justify-content-center flex-wrap">
+                            <Link to="/about" className="text-decoration-none mx-2" style={{ color: '#555' }}>About</Link>
+                            <Link to="/contact" className="text-decoration-none mx-2" style={{ color: '#555' }}>Contact</Link>
+                            <Link to="/privacy" className="text-decoration-none mx-2" style={{ color: '#555' }}>Privacy</Link>
+                            <Link to="/terms" className="text-decoration-none mx-2" style={{ color: '#555' }}>Terms</Link>
+                        </div>
+                        <p className="mt-2 mb-0 small" style={{ color: '#666' }}>© {new Date().getFullYear()} Foodie Delights</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default AuthPage;
